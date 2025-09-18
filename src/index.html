@@ -11,6 +11,10 @@
       rel="stylesheet"
       href="./styles/main.scss"
     />
+    <link rel="icon"
+          type="image/png"
+          href="images/favicon.png"
+    >
   </head>
   <body>
     <div class="container">
@@ -25,37 +29,68 @@
         </div>
       </div>
 
-      <table class="game-field">
-        <tbody>
-          <tr class="field-row">
-            <td class="field-cell"></td>
-            <td class="field-cell"></td>
-            <td class="field-cell"></td>
-            <td class="field-cell"></td>
-          </tr>
+      <div class="game-wrapper">
+        <div class="shift shift--main shift-up"></div>
 
-          <tr class="field-row">
-            <td class="field-cell"></td>
-            <td class="field-cell"></td>
-            <td class="field-cell"></td>
-            <td class="field-cell"></td>
-          </tr>
+        <div class="middle-row">
+          <div class="shift shift--main shift-left"></div>
 
-          <tr class="field-row">
-            <td class="field-cell"></td>
-            <td class="field-cell"></td>
-            <td class="field-cell"></td>
-            <td class="field-cell"></td>
-          </tr>
+          <div class="game-container">
+            <table class="game-field">
+              <tbody>
+                <tr class="field-row">
+                  <td class="field-cell"></td>
+                  <td class="field-cell"></td>
+                  <td class="field-cell"></td>
+                  <td class="field-cell"></td>
+                </tr>
+                <tr class="field-row">
+                  <td class="field-cell"></td>
+                  <td class="field-cell"></td>
+                  <td class="field-cell"></td>
+                  <td class="field-cell"></td>
+                </tr>
+                <tr class="field-row">
+                  <td class="field-cell"></td>
+                  <td class="field-cell"></td>
+                  <td class="field-cell"></td>
+                  <td class="field-cell"></td>
+                </tr>
+                <tr class="field-row">
+                  <td class="field-cell"></td>
+                  <td class="field-cell"></td>
+                  <td class="field-cell"></td>
+                  <td class="field-cell"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
 
-          <tr class="field-row">
-            <td class="field-cell"></td>
-            <td class="field-cell"></td>
-            <td class="field-cell"></td>
-            <td class="field-cell"></td>
+          <div class="shift shift--main shift-right"></div>
+        </div>
+
+        <div class="shift shift--main shift-down"></div>
+      </div>
+
+      <div class="shift-mobile-container">
+        <table class="shift-mobile-grid">
+          <tr>
+            <td></td>
+            <td class="shift--mobile shift-up"></td>
+            <td></td>
           </tr>
-        </tbody>
-      </table>
+          <tr>
+            <td class="shift--mobile shift-left"></td>
+            <td></td>
+            <td class="shift--mobile shift-right"></td>
+          </tr>
+          <tr>
+            <td></td>
+            <td class="shift--mobile shift-down"></td>
+            <td></td>
+          </tr>
+        </table>
+      </div>
 
       <div class="message-container">
         <p class="message message-lose hidden">You lose! Restart the game?</p>
@@ -65,6 +100,6 @@
         </p>
       </div>
     </div>
-    <script src="scripts/main.js"></script>
+    <script src="scripts/main.js" type="module"></script>
   </body>
 </html>

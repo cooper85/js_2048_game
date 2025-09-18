@@ -1,25 +1,47 @@
+@use 'utils/mixins' as mixins;
+@use 'vars/variables' as *;
+@use 'vars/breakpoints' as *;
+
 body {
   margin: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
+
+  /* Fixes for mobile body height */
+  min-height: 100vh;   /* Base fallback */
+  min-height: 100dvh;  /* dynamic height of viewport */
+  min-height: 100svh;  /* stable height */
+
   background: #fbf8ef;
   font-family: sans-serif;
   font-size: 24px;
   font-weight: 900;
 }
 
+
 .field-cell {
-  background: #d6cdc4;
-  width: 75px;
-  height: 75px;
-  border-radius: 5px;
-  color: #776e65;
+  // skip width, size will be calculated based on table
+  height: var(--field-cell-size);
+  width: var(--field-cell-size);
+  min-width: var(--field-cell-size);
+  max-width: var(--field-cell-size);
+  padding: 0;
+  border: 0;
   box-sizing: border-box;
   text-align: center;
-  vertical-align: center;
+  vertical-align: middle;
+  line-height: normal;
+  color: #776e65;
   user-select: none;
+  background: #d6cdc4;
+  border-radius: 15px;
+  white-space: nowrap;
+  overflow: hidden;
+
+  // same width of chars (numbers)
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
 
   &--2 {
     background: #eee4da;
@@ -76,32 +98,37 @@ body {
 }
 
 .game-field {
-  background: #bbada0;
-  border-spacing: 10px;
-  border-radius: 5px;
+  /** content has no influence on cell size */
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: var(--field-border-spacing);
+  background: #776e65;
+  border-radius: 15px;
+
 }
 
 .game-header {
   display: flex;
   width: 100%;
   justify-content: space-between;
-  margin-bottom: 24px;
+  margin-bottom: 36px;
   padding: 10px;
   box-sizing: border-box;
-}
 
-h1 {
-  background: #edc22e;
-  color: #f9f6f2;
-  width: 75px;
-  height: 75px;
-  font-size: 24px;
-  border-radius: 5px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  margin: 0;
+  h1 {
+    user-select: none;
+    background: #edc22e;
+    color: #f9f6f2;
+    width: 75px;
+    height: 75px;
+    font-size: 24px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    margin: 0;
+  }
 }
 
 .info {
@@ -163,6 +190,7 @@ h1 {
   text-align: center;
   border-radius: 5px;
   font-size: 20px;
+  margin-top: 0;
 }
 
 .hidden {
@@ -173,7 +201,7 @@ h1 {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 350px;
+  width: 360px;
 }
 
 .message-win {
@@ -183,5 +211,160 @@ h1 {
 
 .message-container {
   width: 100%;
-  height: 150px;
+  height: 43px;
+  margin-top: 35px;
+}
+
+.game-wrapper {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 10px;
+  touch-action: none;
+}
+
+.shift {
+  display: block;
+  width: 50px;
+  height: 50px;
+  background-color: #776e65;
+  clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+  position: absolute;
+  transition: background-color 0.2s;
+  cursor: pointer;
+}
+
+.shift-mobile-container {
+  display: none;
+}
+
+.shift-mobile-grid {
+  td {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+.shift--mobile {
+  width: 40px;
+  height: 40px;
+  background-color: #776e65;
+  transition: background-color 0.2s;
+  cursor: pointer;
+  margin-bottom: 5px;
+
+  &.shift-up {
+    height: 40px;
+    clip-path: polygon(45% 5%, 5% 95%, 95% 95%);
+    transform: none;
+  }
+  &.shift-right {
+    height: 40px;
+    clip-path: polygon(5% 5%, 5% 95%, 95% 45%);
+    transform: none;
+  }
+  &.shift-down {
+    height: 40px;
+    transform: none;
+    clip-path: polygon(45% 95%, 95% 5%, 5% 5%);
+  }
+  &.shift-left {
+    height: 40px;
+    transform: none;
+    clip-path: polygon(95% 95%, 95% 5%, 5% 45%);
+  }
+}
+
+.shift:hover {
+  background-color: #d6cdc4;
+}
+
+.shift-up {
+  clip-path: polygon(50% 0%, 100% var(--arrow-thickness), 0% var(--arrow-thickness));
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.shift-down {
+  clip-path: polygon(
+    0% var(--arrow-offset),
+    100% var(--arrow-offset),
+    50% 100%
+  );
+  bottom: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.shift-left {
+  left: -30px;
+  top: 50%;
+  transform: translateY(-50%);
+  clip-path: polygon(
+      0% 50%,
+      var(--arrow-thickness) 0%,
+      var(--arrow-thickness) 100%
+  );
+}
+
+.shift-right {
+  right: -30px;
+  top: 50%;
+  transform: translateY(-50%);
+  clip-path: polygon(
+      var(--arrow-offset) 0%,
+      100% 50%,
+      var(--arrow-offset) 100%
+  );
+}
+
+@include mixins.on-mobile {
+  .game-header {
+    margin-bottom: 10px;
+  }
+
+  .shift {
+    display: none;
+  }
+
+  .shift-mobile-container {
+    justify-content: center;
+    display: flex;
+    margin-bottom: 10px;
+  }
+
+  .message-container {
+    margin-top: 0;
+  }
+}
+
+@include mixins.not-supported {
+  /* Push content below the banner height */
+  body {
+    padding-top: 56px; /* match the banner height */
+  }
+
+  /* The banner itself */
+  body::before {
+    content: "This app is not optimized for screens under 360px x 667px";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    height: 56px;
+    padding: 0 16px;
+    box-sizing: border-box;
+
+    background: #111;
+    color: #fff;
+    font: 700 14px/1.2 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    text-align: center;
+
+    z-index: 9999;
+  }
 }

@@ -27,6 +27,15 @@ body {
   user-select: none;
 }
 
+/* stylelint-disable selector-max-id */
+#digit-distort-svg {
+  position: absolute;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+/* stylelint-enable selector-max-id */
+
 .field-cell {
   // skip width, size will be calculated based on table
   height: var(--field-cell-size);

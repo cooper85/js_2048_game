@@ -37,7 +37,6 @@ body {
 /* stylelint-enable selector-max-id */
 
 .field-cell {
-  // skip width, size will be calculated based on table
   height: var(--field-cell-size);
   width: var(--field-cell-size);
   min-width: var(--field-cell-size);
@@ -54,7 +53,6 @@ body {
   white-space: nowrap;
   overflow: hidden;
 
-  // same width of chars (numbers)
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum' 1;
 
@@ -113,7 +111,6 @@ body {
 }
 
 .game-field {
-  /** content has no influence on cell size */
   table-layout: fixed;
   border-collapse: separate;
   border-spacing: var(--field-border-spacing);
@@ -156,7 +153,6 @@ body {
 
   /* stylelint-disable selector-max-id */
   #about {
-    /* wave used the color of text (currentColor) */
     --ripple-color: color-mix(in srgb, currentColor 60%, transparent);
 
     position: relative;
@@ -173,7 +169,6 @@ body {
   }
   /* stylelint-enable selector-max-id */
 
-  /* Each new wave - the separate span */
   /* stylelint-disable selector-max-id */
   #about .ripple {
     position: absolute;
@@ -493,7 +488,6 @@ body {
     padding-top: 56px; /* match the banner height */
   }
 
-  /* The banner itself */
   body::before {
     content: 'This app works best on screens with a resolution of [360px] x [690px] or higher.';
     position: fixed;

@@ -1,7 +1,9 @@
 .sprite {
   display: inline-block;
+
   width: 338px;
   height: 441px;
+
   background-image: url('sprite.png');
   background-repeat: no-repeat;
 }

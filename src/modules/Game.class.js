@@ -3,6 +3,14 @@
 'use strict';
 
 import { CbContainer, Control } from './Control.class.js';
+import { Effect } from './Effect.class.js';
+import { Palette } from './Palette.class.js';
+import { About } from './About.class.js';
+import { Score } from './Score.class.js';
+import { Doomguy } from './Doomguy.class.js';
+import { BounceEffect } from './BounceEffect.class.js';
+import { InitialsPrompt } from './InitialsPrompt.class.js';
+import { Sound } from './Sound.class';
 
 /**
  * This class represents the game.
@@ -13,37 +21,37 @@ export class Game {
   /**
    * Control key up
    * @type {string}
-   * @protected
+   * @private
    */
-  static _CTR_UP = 'ArrowUp';
+  static #ctrUp = 'ArrowUp';
 
   /**
    * Control key down
    * @type {string}
-   * @protected
+   * @private
    */
-  static _CTR_DOWN = 'ArrowDown';
+  static #ctrDown = 'ArrowDown';
 
   /**
    * Control key left
    * @type {string}
-   * @protected
+   * @private
    */
-  static _CTR_LEFT = 'ArrowLeft';
+  static #ctrLeft = 'ArrowLeft';
 
   /**
    * Control key right
    * @type {string}
-   * @protected
+   * @private
    */
-  static _CTR_RIGHT = 'ArrowRight';
+  static #ctrRight = 'ArrowRight';
 
   /**
    * Game statuses
    * @type {Object}
-   * @protected
+   * @private
    */
-  static _statuses = Object.freeze({
+  static #statuses = Object.freeze({
     IDLE: 'idle',
     PLAYING: 'playing',
     WIN: 'win',
@@ -53,76 +61,76 @@ export class Game {
   /**
    * Current game status
    * @type {string}
-   * @protected
+   * @private
    */
-  _status = Game._statuses.IDLE;
+  #status = Game.#statuses.IDLE;
 
   /**
    * Current board state
    * @type {number[][]}
-   * @protected
+   * @private
    */
-  _state;
+  #state;
 
   /**
    * Initial score
    * @type {number}
    * @private
    */
-  _score;
+  #score;
 
   /**
    * Board width
    * @type {number}
    * @private
    */
-  _width;
+  #width;
 
   /**
    * Board height
    * @type {number}
    * @private
    */
-  _height;
+  #height;
 
   /**
    * Width of game board
    * @type {number}
    * @protected
    */
-  static _DEFAULT_WIDTH = 4;
+  static #defaultWidth = 4;
 
   /**
    * Height of game board
    * @type {number}
    * @protected
    */
-  static _DEFAULT_HEIGHT = 4;
+  static #defaultHeight = 4;
 
   /**
    * Cell value generator
    * @return {number}
    */
-  static _cellValueGenerator = () => (Math.random() > 0.9 ? 4 : 2);
+  static #cellValueGenerator = () => (Math.random() > 0.9 ? 4 : 2);
 
   /**
    * Initial not empty cell count
    * @type {number}
    */
-  static _INITIAL_NOT_EMPTY_CELL_COUNT = 2;
+  static #initialNonEmptyCellCount = 2;
 
   /**
    * Win score limit
    * @type {number}
    * @private
    */
-  static _WIN_SCORE = 2048;
+  static #winScore = 2048;
 
   /**
    * Valid direction vectors
    * @type {{'1,0': boolean, '0,1': boolean}}
    */
-  static _validDirectionVectors = {
+  static #validDirectionVectors = {
     '1,0': true,
     '0,1': true,
     '-1,0': true,
@@ -130,75 +138,127 @@ export class Game {
   };
 
   /**
-   * Selector for the game score element
-   * @type {string}
-   */
-  static SCORE_SELECTOR = '.game-score';
-
-  /**
    * Selector for container of messages
    * @type {string}
    */
-  static MESSAGE_CONTAINER_SELECTOR = '.message-container';
+  static #messageContainerSelector = '.message-container';
 
   /**
    * Selector for a message
    * @type {string}
    */
-  static MESSAGE_SELECTOR = '.message';
+  static #messageSelector = '.message';
 
   /**
    * Class used to hide messages
    * @type {string}
    */
-  static HIDDEN_CLASS = 'hidden';
+  static #hiddenClass = 'hidden';
 
   /**
    * Selector for the start button
    * @type {string}
    */
-  static START_BUTTON_SELECTOR = '.button.start';
+  static #startButtonSelector = '.button.start';
+
+  /**
+   * Selector for the restart button
+   * @type {string}
+   */
+  static #restartButtonSelector = '.button.restart';
 
   /**
    * Selector for the game board
    * @type {string}
    */
-  static BOARD_SELECTOR = '.game-field tbody';
+  static #boardSelector = '.game-field tbody';
 
   /**
    * Control manager that supports touchpad and mouse swipes
    * @type {Control}
    * @private
    */
-  _control;
+  #control;
 
   /**
-   * @typedef {Object} TileColor
-   * @property {string} background - The tile's background color in CSS format.
-   * @property {string} text - The color of the text on the tile.
+   * Logo element selector
+   * @type {string}
    */
+  static #logoSelector = '#logo';
+
   /**
-   * Tile palette
-   * @type {TileColor[]}
+   * Effect manager for app
+   * @type {Effect}
+   * @private
    */
-  static TILE_PALETTE = [
-    { background: 'hsl(45, 100%, 95%)', text: 'black' },
-    { background: 'hsl(40, 100%, 90%)', text: 'black' },
-    { background: 'hsl(35, 100%, 80%)', text: 'black' },
-    { background: 'hsl(30, 100%, 70%)', text: 'black' },
-    { background: 'hsl(25, 100%, 65%)', text: 'white' },
-    { background: 'hsl(15, 100%, 60%)', text: 'white' },
-    { background: 'hsl(5, 90%, 60%)', text: 'white' },
-    { background: 'hsl(340, 80%, 65%)', text: 'white' },
-    { background: 'hsl(310, 70%, 60%)', text: 'white' },
-    { background: 'hsl(260, 60%, 55%)', text: 'white' },
-    { background: 'hsl(220, 70%, 50%)', text: 'white' },
-    { background: 'hsl(180, 80%, 45%)', text: 'black' },
-    { background: 'hsl(140, 85%, 40%)', text: 'white' },
-    { background: 'hsl(50, 100%, 50%)', text: 'black' },
-    { background: 'hsl(0, 0%, 100%)', text: 'black' },
-    { background: 'hsl(240, 20%, 15%)', text: 'white' },
-  ];
+  #logoEffect;
+
+  /**
+   * About element selector
+   * @type {string}
+   */
+  static #aboutSelector = '#about';
+
+  /**
+   * Window about wrapper element selector
+   * @type {string}
+   */
+  static #windowAboutWrapperSelector = '.window-about-wrapper';
+
+  /**
+   * About flow controller
+   * @type {About}
+   * @private
+   */
+  #aboutController;
+
+  /**
+   * Score element selector
+   * @type {string}
+   */
+  static #scoreSelector = '#score';
+
+  /**
+   * Score flow controller
+   * @type {Score}
+   * @private
+   */
+  #scoreController;
+
+  /**
+   * Selector for game board and related elements
+   * @type {string}
+   */
+  static #gameContentSelector =
+    '.game-wrapper, .shift-mobile-container, .bottom-container';
+
+  /**
+   * Generic selector for all modal windows
+   * @type {string}
+   */
+  static #genericModalWindowSelector = '.window-wrapper';
+
+  /**
+   * Domguy elements selector
+   * @type {string}
+   */
+  static #doomGuySelector = '.doomguy';
+
+  /**
+   * Doom guy animation helper
+   *
+   * @type {Doomguy}
+   * @private
+   */
+  #doomguy;
+
+  /**
+   * Custom animation helper for the restart button
+   *
+   * @type {BounceEffect}
+   * @private
+   */
+  #bounceEffect;
 
   /**
    * Creates a new game instance.
@@ -215,12 +275,137 @@ export class Game {
    * initial state.
    */
   constructor(initialState) {
+    this._initInteractiveElements();
     this._initControls();
 
     // if there is some initial state - start the game automatically
     if (initialState) {
       this.restart(initialState);
     }
+  }
+
+  /**
+   * Init game effects
+   * @private
+   */
+  _initInteractiveElements() {
+    /**
+     * Game content HTML elements
+     * @type {NodeListOf<Element>}
+     */
+    const gameContentElements = document.querySelectorAll(
+      Game.#gameContentSelector,
+    );
+
+    /**
+     * List of HTML elements for modal windows
+     * @type {NodeListOf<Element>}
+     */
+    const modalWindowElements = document.querySelectorAll(
+      Game.#genericModalWindowSelector,
+    );
+
+    /**
+     * Logo element - hide all modal windows
+     * @type {Element}
+     */
+    const logoElement = document.querySelector(Game.#logoSelector);
+
+    // hide all modals, show the main board
+    logoElement.addEventListener('click', () => {
+      gameContentElements.forEach((el) => el.classList.remove('hidden'));
+      modalWindowElements.forEach((el) => el.classList.add('hidden'));
+    });
+
+    /**
+     * Effect manager for app
+     * @type {Effect}
+     * @private
+     */
+    this.#logoEffect = new Effect(logoElement);
+    this.#logoEffect.apply();
+
+    /**
+     * About CTA HTML element
+     * @type {Element}
+     */
+    const aboutElement = document.querySelector(Game.#aboutSelector);
+
+    /**
+     * About window HTML element
+     * @type {Element}
+     */
+    const windowAboutElement = document.querySelector(
+      Game.#windowAboutWrapperSelector,
+    );
+
+    /**
+     * About controller
+     * @type {About}
+     */
+    this.#aboutController = new About(
+      aboutElement,
+      windowAboutElement,
+      modalWindowElements,
+      gameContentElements,
+    );
+
+    /**
+     * Score CTA HTML element
+     * @type {Element}
+     */
+    const scoreElement = document.querySelector(Game.#scoreSelector);
+
+    /**
+     * Score window HTML element
+     * @type {Score}
+     */
+    const windowScoreElement = document.querySelector('.window-score-wrapper');
+
+    /**
+     * Score controller
+     * @type {Score}
+     */
+    this.#scoreController = new Score(
+      scoreElement,
+      windowScoreElement,
+      modalWindowElements,
+      gameContentElements,
+    );
+
+    /**
+     * All doomguy elements on the page
+     * @type {NodeList}
+     */
+    const doomguyElements = document.querySelectorAll(Game.#doomGuySelector);
+
+    /**
+     * Doomguy manager
+     * @type {Doomguy}
+     * @private
+     */
+    this.#doomguy = new Doomguy(doomguyElements);
+
+    /**
+     * Restart button element
+     * @type {HTMLElement}
+     */
+    const restartButtonElement = document.querySelector(
+      Game.#restartButtonSelector,
+    );
+
+    /**
+     * Restart button inner part
+     * @type {HTMLElement}
+     */
+    const restartButtonInnerElement =
+      restartButtonElement.querySelector('div:nth-child(1)');
+
+    // fancy animation for the restart button
+    this.#bounceEffect = new BounceEffect(
+      restartButtonElement,
+      restartButtonInnerElement,
+    );
   }
 
   /**
@@ -237,21 +422,29 @@ export class Game {
 
     document.addEventListener('keydown', (e) => {
       switch (e.key) {
-        case Game._CTR_UP:
-          // eslint-disable-next-line no-unused-expressions
-          controls.up && controls.up();
+        case Game.#ctrUp:
+          if (this.#status === Game.#statuses.PLAYING) {
+            // eslint-disable-next-line no-unused-expressions
+            controls.up && controls.up();
+          }
           break;
-        case Game._CTR_DOWN:
-          // eslint-disable-next-line no-unused-expressions
-          controls.down && controls.down();
+        case Game.#ctrDown:
+          if (this.#status === Game.#statuses.PLAYING) {
+            // eslint-disable-next-line no-unused-expressions
+            controls.down && controls.down();
+          }
           break;
-        case Game._CTR_LEFT:
-          // eslint-disable-next-line no-unused-expressions
-          controls.left && controls.left();
+        case Game.#ctrLeft:
+          if (this.#status === Game.#statuses.PLAYING) {
+            // eslint-disable-next-line no-unused-expressions
+            controls.left && controls.left();
+          }
           break;
-        case Game._CTR_RIGHT:
-          // eslint-disable-next-line no-unused-expressions
-          controls.right && controls.right();
+        case Game.#ctrRight:
+          if (this.#status === Game.#statuses.PLAYING) {
+            // eslint-disable-next-line no-unused-expressions
+            controls.right && controls.right();
+          }
           break;
       }
     });
@@ -279,12 +472,18 @@ export class Game {
     const onStart = this.start.bind(this);
 
     document
-      .querySelector(Game.START_BUTTON_SELECTOR)
+      .querySelector(Game.#startButtonSelector)
       ?.addEventListener('click', onStart);
+
+    const onRestart = this.restart.bind(this);
+
+    document
+      .querySelector(Game.#restartButtonSelector)
+      ?.addEventListener('click', onRestart);
 
     // add support of mouse and touchpad / screen for swipe actions
     this._control = new Control(
-      document.querySelector(Game.BOARD_SELECTOR),
+      document.querySelector(Game.#boardSelector),
       controls,
     );
   }
@@ -306,8 +505,19 @@ export class Game {
     // update score indicator
     this._updateScore();
 
-    // check if necessary to update the shown messages
+    // update message
     this._updateMessage();
+
+    // update doomguy fancy icon
+    this._updateDoomguy();
+
+    // update start / restart buttons visibility
+    this._updatePlayButtons();
+
+    // update score table
+    if ([Game.#statuses.WIN, Game.#statuses.LOSE].includes(this.#status)) {
+      this._updateHighScore();
+    }
   }
 
   /**
@@ -319,7 +529,7 @@ export class Game {
    * @private
    */
   _shift(dx, dy) {
-    if (this._status !== Game._statuses.PLAYING) {
+    if (this.#status !== Game.#statuses.PLAYING) {
       throw new Error('Game is not started or it is finished');
     }
 
@@ -329,7 +539,7 @@ export class Game {
 
     const key = `${dx},${dy}`;
 
-    if (!Game._validDirectionVectors[key]) {
+    if (!Game.#validDirectionVectors[key]) {
       throw new RangeError(
         'Invalid shift: only single shift allowed ' +
           '(dx,dy) = (+-1,0) or (0,+-1), ' +
@@ -371,7 +581,7 @@ export class Game {
       if (horizontal) {
         state[i] = newLine;
       } else {
-        for (let j = 0; j < this._height; j++) {
+        for (let j = 0; j < this.#height; j++) {
           state[j][i] = newLine[j];
         }
       }
@@ -433,7 +643,7 @@ export class Game {
      */
     const isReverse = (horizontal && dx > 0) || (!horizontal && dy > 0);
 
-    for (let i = 0; i < (horizontal ? this._width : this._height); i++) {
+    for (let i = 0; i < (horizontal ? this.#width : this.#height); i++) {
       const line = getLine(i);
       const merged = mergeLine(line, isReverse);
 
@@ -456,34 +666,34 @@ export class Game {
    */
   _сheckWinLose() {
     // no actions
-    if ([Game._statuses.WIN, Game._statuses.LOSE].includes(this._status)) {
+    if ([Game.#statuses.WIN, Game.#statuses.LOSE].includes(this.#status)) {
       return;
     }
 
     // some 2048 cells in any row - change status to win
-    if (this._state.some((row) => row.includes(2048))) {
-      this._status = Game._statuses.WIN;
+    if (this.#state.some((row) => row.includes(2048))) {
+      this.#status = Game.#statuses.WIN;
 
       return;
     }
 
     // there are empty cells - so can continue
-    for (let x = 0; x < this._width; x++) {
-      for (let y = 0; y < this._height; y++) {
-        if (this._state[x][y] === 0) {
+    for (let x = 0; x < this.#width; x++) {
+      for (let y = 0; y < this.#height; y++) {
+        if (this.#state[x][y] === 0) {
           return;
         }
       }
     }
 
     // check merging possibility
-    for (let x = 0; x < this._width; x++) {
-      for (let y = 0; y < this._height; y++) {
+    for (let x = 0; x < this.#width; x++) {
+      for (let y = 0; y < this.#height; y++) {
         // are there same values in neighbouring cells?
         if (
-          (x < this._width - 1 &&
-            this._state[x][y] === this._state[x + 1][y]) ||
-          (y < this._height - 1 && this._state[x][y] === this._state[x][y + 1])
+          (x < this.#width - 1 &&
+            this.#state[x][y] === this.#state[x + 1][y]) ||
+          (y < this.#height - 1 && this.#state[x][y] === this.#state[x][y + 1])
         ) {
           // so merging is still possible
           return;
@@ -492,10 +702,7 @@ export class Game {
     }
 
     // otherwise it is a defeat
-    this._status = Game._statuses.LOSE;
-
-    // update message
-    this._updateMessage();
+    this.#status = Game.#statuses.LOSE;
   }
 
   /**
@@ -505,14 +712,14 @@ export class Game {
   _recalculateScore() {
     let score = 0;
 
-    for (let i = 0; i < this._width; i++) {
-      for (let j = 0; j < this._height; j++) {
-        if (this._state[i][j] !== 0) {
-          score += this._state[i][j];
+    for (let i = 0; i < this.#width; i++) {
+      for (let j = 0; j < this.#height; j++) {
+        if (this.#state[i][j] !== 0) {
+          score += this.#state[i][j];
         }
       }
     }
-    this._score = score;
+    this.#score = score;
   }
 
   /**
@@ -534,8 +741,8 @@ export class Game {
      * or last color from the palette for inappropriate indexes
      */
     return (
-      Game.TILE_PALETTE[paletteIndex] ||
-      Game.TILE_PALETTE[Game.TILE_PALETTE.length - 1]
+      Palette.tilePalette[paletteIndex] ||
+      Palette.tilePalette[Palette.tilePalette.length - 1]
     );
   }
 
@@ -544,18 +751,18 @@ export class Game {
    * @private
    */
   _updateBoard() {
-    for (let i = 0; i < this._width; i++) {
-      for (let j = 0; j < this._height; j++) {
+    for (let i = 0; i < this.#width; i++) {
+      for (let j = 0; j < this.#height; j++) {
         const cell = document.querySelector(
-          `${Game.BOARD_SELECTOR} tr:nth-child(${i + 1}) td:nth-child(${j + 1})`,
+          `${Game.#boardSelector} tr:nth-child(${i + 1}) td:nth-child(${j + 1})`,
         );
         const colorConfig = this._getColors(
-          this._state[i][j] > 0 ? this._state[i][j] : 1,
+          this.#state[i][j] > 0 ? this.#state[i][j] : 1,
         );
 
         cell.style.color = colorConfig.text;
         cell.style.backgroundColor = colorConfig.background;
-        cell.innerHTML = this._state[i][j] > 0 ? this._state[i][j] : '';
+        cell.innerHTML = this.#state[i][j] > 0 ? this.#state[i][j] : '';
       }
     }
   }
@@ -565,10 +772,10 @@ export class Game {
    * @private
    */
   _updateScore() {
-    const scoreElement = document.querySelector(Game.SCORE_SELECTOR);
+    const scoreElement = document.querySelector(Game.#scoreSelector);
 
     if (scoreElement) {
-      scoreElement.innerText = this._score;
+      scoreElement.innerText = this.#score;
     }
   }
 
@@ -578,17 +785,17 @@ export class Game {
    */
   _updateMessage() {
     const messagesSelector =
-      Game.MESSAGE_CONTAINER_SELECTOR + ' > ' + Game.MESSAGE_SELECTOR;
-    const targetMessageSelector = messagesSelector + '-' + this._status;
+      Game.#messageContainerSelector + ' > ' + Game.#messageSelector;
+    const targetMessageSelector = messagesSelector + '-' + this.#status;
     const messageElements = document.querySelectorAll(messagesSelector);
     const targetMessage = document.querySelector(targetMessageSelector);
 
     messageElements.forEach((messageElement) => {
-      messageElement.classList.add(Game.HIDDEN_CLASS);
+      messageElement.classList.add(Game.#hiddenClass);
     });
 
     if (targetMessage) {
-      targetMessage.classList.remove(Game.HIDDEN_CLASS);
+      targetMessage.classList.remove(Game.#hiddenClass);
     }
   }
 
@@ -597,6 +804,7 @@ export class Game {
    */
   moveLeft() {
     this._shift(-1, 0);
+    Sound.beep(500);
     this._addRandomCell();
     this._gameCycle();
   }
@@ -606,6 +814,7 @@ export class Game {
    */
   moveRight() {
     this._shift(1, 0);
+    Sound.beep(600);
     this._addRandomCell();
     this._gameCycle();
   }
@@ -615,6 +824,7 @@ export class Game {
    */
   moveUp() {
     this._shift(0, -1);
+    Sound.beep(700);
     this._addRandomCell();
     this._gameCycle();
   }
@@ -624,6 +834,7 @@ export class Game {
    */
   moveDown() {
     this._shift(0, 1);
+    Sound.beep(400);
     this._addRandomCell();
     this._gameCycle();
   }
@@ -634,7 +845,7 @@ export class Game {
    * @returns {number}
    */
   getScore() {
-    return this._score;
+    return this.#score;
   }
 
   /**
@@ -642,7 +853,7 @@ export class Game {
    * @returns {number[][]}
    */
   getState() {
-    return this._state;
+    return this.#state;
   }
 
   /**
@@ -656,7 +867,7 @@ export class Game {
    * `lose` - the game is lost
    */
   getStatus() {
-    return this._status;
+    return this.#status;
   }
 
   /**
@@ -668,49 +879,116 @@ export class Game {
 
   /**
    * Resets the game.
+   * @param {Array|Event} initialState
    */
-  restart(initialState = null) {
+  restart(initialState = false) {
     // status playing
-    this._status = Game._statuses.PLAYING;
+    this.#status = Game.#statuses.PLAYING;
+    this._updatePlayButtons();
     // score 0
-    this._score = 0;
+    this.#score = 0;
 
-    // empty board, random cell
     try {
-      if (!initialState) {
-        // initialize board dimensions
-        this._width = Game._DEFAULT_WIDTH;
-        this._height = Game._DEFAULT_HEIGHT;
+      /**
+       * Initialize the board with empty cells or some initial state
+       */
+      this._initializeBoard(initialState);
 
-        // create a new clear board
-        this._state = this._create2DArray(
-          Game._DEFAULT_HEIGHT,
-          Game._DEFAULT_WIDTH,
-          0,
-        );
-      } else {
-        // initiate board with not empty cells
-        if (!this._isValidRectangleMatrix(initialState)) {
-          throw new TypeError('Invalid initial state');
-        }
-        // initialize board dimensions
-        this._width = initialState[0].length;
-        this._height = initialState.length;
-
-        this._state = initialState;
-      }
+      /**
+       * Draw board
+       */
+      this._drawBoard();
 
       /**
        * Add some initial cell
-       * (minus one that will be added by default in the cycle)
        */
-      this._addRandomCell(Game._INITIAL_NOT_EMPTY_CELL_COUNT);
+      this._addRandomCell(Game.#initialNonEmptyCellCount);
+
+      /**
+       * Update current state of health (doom guy)
+       */
+      this._updateDoomguy();
 
       // inner cycle of the game
       this._gameCycle();
     } catch (error) {
-      alert('fuck');
-      // ERROR HANDLER PLACEHOLDER
+      // no-op, production mode, "something goes wrong"?
+    }
+  }
+
+  /**
+   * Initialize the board with empty cells or some initial state
+   *
+   * @param initialState
+   * @private
+   */
+  _initializeBoard(initialState) {
+    // check against a passed array for initialState defined
+    if (!Array.isArray(initialState)) {
+      // initialize board dimensions
+      this.#width = Game.#defaultWidth;
+      this.#height = Game.#defaultHeight;
+
+      // create a new clear board
+      this.#state = this._create2DArray(
+        Game.#defaultWidth,
+        Game.#defaultHeight,
+        0,
+      );
+    } else {
+      // initiate board with not empty cells
+      if (!this._isValidRectangleMatrix(initialState)) {
+        throw new TypeError('Invalid initial state');
+      }
+      // initialize board dimensions
+      this.#width = initialState[0].length;
+      this.#height = initialState.length;
+
+      this.#state = initialState;
+    }
+  }
+
+  static gameFieldRowClass = 'field-row';
+  static gameFieldCellClass = 'field-cell';
+  /**
+   * Draw board
+   * @private
+   */
+  _drawBoard() {
+    const board = document.querySelector(Game.#boardSelector);
+
+    board.innerHTML = '';
+
+    for (let i = 0; i < this.#height; i++) {
+      const tr = document.createElement('tr');
+
+      tr.classList.add(Game.gameFieldRowClass);
+
+      for (let j = 0; j < this.#width; j++) {
+        const td = document.createElement('td');
+
+        td.classList.add(Game.gameFieldCellClass);
+        tr.appendChild(td);
+      }
+      board.appendChild(tr);
+    }
+  }
+
+  /**
+   * Update actual start/restart buttons visibility
+   * @private
+   */
+  _updatePlayButtons() {
+    const startButton = document.querySelector(Game.#startButtonSelector);
+    const reStartButton = document.querySelector(Game.#restartButtonSelector);
+    const startBtnVisible = this.#status !== Game.#statuses.PLAYING;
+
+    if (startBtnVisible) {
+      startButton.classList.remove(Game.#hiddenClass);
+      reStartButton.classList.add(Game.#hiddenClass);
+    } else {
+      startButton.classList.add(Game.#hiddenClass);
+      reStartButton.classList.remove(Game.#hiddenClass);
     }
   }
 
@@ -738,8 +1016,8 @@ export class Game {
       for (let j = 0; j < row.length; j++) {
         if (
           !Number.isInteger(row[j]) ||
-          row[j] < 0
-          // || row[j] >= Game._WIN_SCORE
+          row[j] < 0 ||
+          row[j] >= Game._WIN_SCORE
         ) {
           return false;
         }
@@ -757,12 +1035,22 @@ export class Game {
   _addRandomCell(count = 1) {
     for (let i = 0; i < count; i++) {
       // get random empty cell
-      const [r, c] = this._getRandomEmptyCell();
+      const result = this._getRandomEmptyCell();
+
+      /**
+       * If there are no free cells for previous concrete action by user,
+       * but state is still playable - just skip
+       */
+      if (result === null) {
+        break;
+      }
+
+      const [r, c] = result;
       // get current board
       const state = this.getState();
 
       // initiate value to cell
-      state[r][c] = Game._cellValueGenerator();
+      state[r][c] = Game.#cellValueGenerator();
     }
   }
 
@@ -793,7 +1081,7 @@ export class Game {
     }
 
     if (result === null) {
-      throw new Error('No empty cells');
+      // throw new Error('No empty cells');
     }
 
     return result;
@@ -815,5 +1103,52 @@ export class Game {
     }
 
     return result;
+  }
+
+  /**
+   * Get fancy health status (number of free cells' percentage)
+   *
+   * @return {number} - integer percentage
+   */
+  _getHealthStatus() {
+    const state = this.getState();
+    const freeCellNumber = state
+      .flat()
+      .filter((val) => (parseInt(val) === 0 ? 1 : 0)).length;
+
+    return Math.round((freeCellNumber / (this.#width * this.#height)) * 100);
+  }
+
+  /**
+   * Update doomguy fancy icon
+   * @return void
+   * @private
+   */
+  _updateDoomguy() {
+    /**
+     * Custom doom guy event
+     * @type {CustomEvent}
+     */
+    const doomguyEvent = new CustomEvent(Doomguy.event, {
+      detail: { health: this._getHealthStatus() },
+    });
+
+    // Dispatching on the window object
+    window.dispatchEvent(doomguyEvent);
+  }
+
+  /**
+   * Update high-score table
+   * @return void
+   * @private
+   */
+  _updateHighScore() {
+    // eslint-disable-next-line no-new
+    new InitialsPrompt({
+      onSubmit: (initials) => {
+        this.#scoreController.addScore(initials, this.getScore());
+        this.restart();
+      },
+    });
   }
 }

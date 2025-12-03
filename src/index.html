@@ -11,21 +11,69 @@
       rel="stylesheet"
       href="./styles/main.scss"
     />
-    <link rel="icon"
-          type="image/png"
-          href="images/favicon.png"
-    >
+    <link
+      rel="icon"
+      type="image/png"
+      href="images/favicon.png"
+    />
   </head>
   <body>
     <div class="container">
       <div class="game-header">
-        <h1>2048</h1>
-        <div class="controls">
-          <p class="info">
-            Score:
-            <span class="game-score">0</span>
-          </p>
-          <button class="button start">Start</button>
+        <h1 id="logo">2048</h1>
+        <h1
+          id="about"
+          class="about-cta"
+        >
+          <div class="water-container">
+            <div class="ripple-origin">?</div>
+          </div>
+        </h1>
+        <p
+          class="score game-score"
+          id="score"
+        >
+          Score:
+          <span class="game-score">0</span>
+        </p>
+        <button class="button start">PLAY</button>
+        <button class="button restart hidden">
+          <div>RE</div>
+          START
+        </button>
+      </div>
+
+      <div class="window-about-wrapper window-wrapper hidden">
+        <div class="window-about">
+          <h1>About</h1>
+          <div>
+            This project is a learning edition of the classic game 2048.
+          </div>
+          <div>
+            It was fascinating to work on, because I got to dive into the game
+            mechanics, try out different solutions, and learn a lot while
+            putting it all together.
+          </div>
+          <div>
+            Think of it as fueling a programmer’s brain — every coffee-sized
+            donation keeps the code flowing!
+          </div>
+          <div class="heart-button-container">
+            <a
+              href="https://donatello.to/SergeiZubinskiy"
+              target="_blank"
+              class="button donate heart-button"
+            >
+              <span>Donate</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="window-score-wrapper window-wrapper hidden">
+        <h1 class="widnow-score-title">HIGH SCORE</h1>
+        <div class="window-score">
+          <div class="window-score-body the9999-background"></div>
         </div>
       </div>
 
@@ -81,7 +129,9 @@
           </tr>
           <tr>
             <td class="shift--mobile shift-left"></td>
-            <td></td>
+            <td>
+              <div class="doomguy"></div>
+            </td>
             <td class="shift--mobile shift-right"></td>
           </tr>
           <tr>
@@ -92,14 +142,67 @@
         </table>
       </div>
 
-      <div class="message-container">
-        <p class="message message-lose hidden">You lose! Restart the game?</p>
-        <p class="message message-win hidden">Winner! Congrats! You did it!</p>
-        <p class="message message-start">
-          Press "Start" to begin game. Good luck!
-        </p>
+      <div class="bottom-container">
+        <div class="message-container">
+          <p class="message message-lose hidden">
+            You lose!
+            <br />
+            Restart the game?
+          </p>
+          <p class="message message-win hidden">
+            Winner! Congrats!
+            <br />
+            You did it!
+          </p>
+          <p class="message message-start">
+            Press "Start" to begin the game. Good luck!
+          </p>
+        </div>
+        <div
+          class="doomguy"
+          data-health="100"
+        ></div>
       </div>
     </div>
-    <script src="scripts/main.js" type="module"></script>
+
+    <script
+      src="scripts/main.js"
+      type="module"
+    ></script>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      style="position: absolute; width: 0; height: 0; pointer-events: none"
+    >
+      <filter id="digit-distort">
+        <feturbulence
+          type="fractalNoise"
+          baseFrequency="0.01 0.02"
+          numOctaves="2"
+          seed="3"
+          result="noise"
+        >
+          <animate
+            attributeName="baseFrequency"
+            dur="6s"
+            values="0.005 0.01;0.02 0.03;0.005 0.01"
+            repeatCount="indefinite"
+          ></animate>
+        </feturbulence>
+        <fedisplacementmap
+          in="SourceGraphic"
+          in2="noise"
+          scale="8"
+          xChannelSelector="R"
+          yChannelSelector="G"
+        >
+          <animate
+            attributeName="scale"
+            dur="6s"
+            values="4;10;4"
+            repeatCount="indefinite"
+          ></animate>
+        </fedisplacementmap>
+      </filter>
+    </svg>
   </body>
 </html>

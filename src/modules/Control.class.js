@@ -4,9 +4,32 @@
  * Container for callback actions
  */
 export class CbContainer {
+  /**
+   * Control callback for the left action
+   * @type {function}
+   * @private
+   */
   left;
+
+  /**
+   * Control callback for the right action
+   * @type {function}
+   * @private
+   */
   right;
+
+  /**
+   * Control callback for the up action
+   * @type {function}
+   * @private
+   */
   up;
+
+  /**
+   * Control callback for the down action
+   * @type {function}
+   * @private
+   */
   down;
 
   /**
@@ -26,22 +49,26 @@ export class CbContainer {
  * - mouse/touch/pointer swipe on board
  */
 export class Control {
-  /** Minimal distance in px to activate swipe */
-  static _minDistance = 30;
+  /**
+   * Minimal distance in px to activate swipe
+   * @type {number}
+   * @private
+   */
+  static #minDistance = 30;
 
   /** @type {number} */
-  _startX = 0;
+  #startX = 0;
   /** @type {number} */
-  _startY = 0;
+  #startY = 0;
   /** @type {boolean} */
-  _isPointerDown = false;
+  #isPointerDown = false;
   /** @type {boolean} */
-  _swipeFired = false;
+  #swipeFired = false;
 
   /** @type {HTMLElement} */
-  _board;
+  #board;
   /** @type {CbContainer} */
-  _callbacks;
+  #callbacks;
 
   /**
    * Constructor
@@ -54,26 +81,11 @@ export class Control {
       throw new Error('Control: boardContainer must be an HTMLElement');
     }
 
-    this._board = boardContainer;
-    this._callbacks = callbackContainer;
-
-    // Bind once
-    this._onPointerDown = this._onPointerDown.bind(this);
-    this._onPointerMove = this._onPointerMove.bind(this);
-    this._onPointerUpOrCancel = this._onPointerUpOrCancel.bind(this);
+    this.#board = boardContainer;
+    this.#callbacks = callbackContainer;
 
     // Use Pointer Events for unified handling
-    this._board.addEventListener('pointerdown', this._onPointerDown);
-  }
-
-  /**
-   * Remove all bounded event listeners
-   */
-  destroy() {
-    this._board.removeEventListener('pointerdown', this._onPointerDown);
-    this._board.removeEventListener('pointermove', this._onPointerMove);
-    this._board.removeEventListener('pointerup', this._onPointerUpOrCancel);
-    this._board.removeEventListener('pointercancel', this._onPointerUpOrCancel);
+    this.#board.addEventListener('pointerdown', this.#onPointerDown);
   }
 
   /**
@@ -81,30 +93,31 @@ export class Control {
    * @param {PointerEvent} e
    * @private
    */
-  _onPointerDown(e) {
+  #onPointerDown(e) {
     // Ignore non-left mouse button
     if (e.pointerType === 'mouse' && e.button !== 0) {
       return;
     }
 
-    this._isPointerDown = true;
-    this._swipeFired = false;
-    this._startX = e.clientX;
-    this._startY = e.clientY;
+    this.#isPointerDown = true;
+    this.#swipeFired = false;
+    this.#startX = e.clientX;
+    this.#startY = e.clientY;
 
     // Capture the pointer to keep receiving events outside the element
-    if (this._board.setPointerCapture) {
+    if (this.#board.setPointerCapture) {
       try {
-        this._board.setPointerCapture(e.pointerId);
+        this.#board.setPointerCapture(e.pointerId);
       } catch {
-        // no-op if capture not available
+        // no-op if capture isn't available,
+        // production mode, "something goes wrong"?
       }
     }
 
     // Attach move/up handlers for the duration of the gesture
-    this._board.addEventListener('pointermove', this._onPointerMove);
-    this._board.addEventListener('pointerup', this._onPointerUpOrCancel);
-    this._board.addEventListener('pointercancel', this._onPointerUpOrCancel);
+    this.#board.addEventListener('pointermove', this.#onPointerMove);
+    this.#board.addEventListener('pointerup', this.#onPointerUpOrCancel);
+    this.#board.addEventListener('pointercancel', this.#onPointerUpOrCancel);
   }
 
   /**
@@ -112,45 +125,45 @@ export class Control {
    * @param {PointerEvent} e
    * @private
    */
-  _onPointerMove(e) {
-    if (!this._isPointerDown || this._swipeFired) {
+  #onPointerMove(e) {
+    if (!this.#isPointerDown || this.#swipeFired) {
       return;
     }
 
-    const dx = e.clientX - this._startX;
-    const dy = e.clientY - this._startY;
+    const dx = e.clientX - this.#startX;
+    const dy = e.clientY - this.#startY;
     const adx = Math.abs(dx);
     const ady = Math.abs(dy);
 
     // Wait until the threshold is exceeded
-    if (Math.max(adx, ady) < Control._minDistance) {
+    if (Math.max(adx, ady) < Control.#minDistance) {
       return;
     }
 
     // Decide axis by the larger delta and fire exactly one callback
     if (adx > ady) {
       if (dx > 0) {
-        if (this._callbacks.right) {
-          this._callbacks.right();
+        if (this.#callbacks.right) {
+          this.#callbacks.right();
         }
       } else {
-        if (this._callbacks.left) {
-          this._callbacks.left();
+        if (this.#callbacks.left) {
+          this.#callbacks.left();
         }
       }
     } else {
       if (dy > 0) {
-        if (this._callbacks.down) {
-          this._callbacks.down();
+        if (this.#callbacks.down) {
+          this.#callbacks.down();
         }
       } else {
-        if (this._callbacks.up) {
-          this._callbacks.up();
+        if (this.#callbacks.up) {
+          this.#callbacks.up();
         }
       }
     }
 
-    this._swipeFired = true;
+    this.#swipeFired = true;
   }
 
   /**
@@ -158,20 +171,20 @@ export class Control {
    * @param {PointerEvent} e
    * @private
    */
-  _onPointerUpOrCancel(e) {
-    this._isPointerDown = false;
-    this._swipeFired = false;
+  #onPointerUpOrCancel(e) {
+    this.#isPointerDown = false;
+    this.#swipeFired = false;
 
-    if (this._board.releasePointerCapture) {
+    if (this.#board.releasePointerCapture) {
       try {
-        this._board.releasePointerCapture(e.pointerId);
+        this.#board.releasePointerCapture(e.pointerId);
       } catch {
-        // no-op
+        // no-op, production mode, "something goes wrong"?
       }
     }
 
-    this._board.removeEventListener('pointermove', this._onPointerMove);
-    this._board.removeEventListener('pointerup', this._onPointerUpOrCancel);
-    this._board.removeEventListener('pointercancel', this._onPointerUpOrCancel);
+    this.#board.removeEventListener('pointermove', this.#onPointerMove);
+    this.#board.removeEventListener('pointerup', this.#onPointerUpOrCancel);
+    this.#board.removeEventListener('pointercancel', this.#onPointerUpOrCancel);
   }
 }
